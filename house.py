@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 # from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -35,8 +35,9 @@ def login():
     URL = "https://a806-housingconnectapi.nyc.gov/id4/account/login?returnUrl=%2Fid4%2Fconnect%2Fauthorize%2Fcallback%3Fresponse_type%3Did_token%2520token%26client_id%3Dpublicweb%26state%3Daf6QSTjaGSHN1WXz9M3KMViRDjEJk1sSV8lR5Hin;%252Fsome-state;p1%253D1;p2%253D2%26redirect_uri%3Dhttps%253A%252F%252Fhousingconnect.nyc.gov%252FPublicWeb%252F%26scope%3Dopenid%2520profile%2520email%2520usermanagementapi%2520publicapi%26nonce%3Daf6QSTjaGSHN1WXz9M3KMViRDjEJk1sSV8lR5Hin"
 
     driver.get(URL)
-    time.sleep(5)
-    username = driver.find_element(By.ID,"Username")
+    username = WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.ID,"Username"))
+    )
     password = driver.find_element(By.ID,"Password")
 
     username.send_keys(os.getenv("USERNAME"))
@@ -45,14 +46,14 @@ def login():
     login = driver.find_element(By.ID,"loginBtn")
 
     login.click()
-    time.sleep(5)
-
-
-    login = driver.find_element("xpath", "//button[@class='btn btn-light margin-left-20 shadow-2 hoverable']")
+    # time.sleep(5)
+    login = WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located(("xpath", "//button[@class='btn btn-light margin-left-20 shadow-2 hoverable']"))
+    )
 
     login.click()
 
-    time.sleep(4)
+    time.sleep(3)
 
 def apply(lotteryID):
     """
@@ -227,6 +228,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
