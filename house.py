@@ -10,11 +10,13 @@ import json
 import time
 import requests
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+file = open('users.json')
+env = json.load(file)
+userId = 0
 
-CHROME_PATH = os.getenv("CHROME_PATH")
+CHROME_PATH = env['CHROME_PATH']
+USERS = env['users']
 
 ser = Service(CHROME_PATH)
 
@@ -40,8 +42,8 @@ def login():
     )
     password = driver.find_element(By.ID,"Password")
 
-    username.send_keys(os.getenv("USERNAME"))
-    password.send_keys(os.getenv("PASSWORD"))
+    username.send_keys(USERS[userId]['USERNAME'])
+    password.send_keys(USERS[userId]['PASSWORD'])
 
     login = driver.find_element(By.ID,"loginBtn")
 
@@ -80,54 +82,37 @@ def apply(lotteryID):
 
     time.sleep(3)
 
-    apply = driver.find_element(By.ID, "apply-section")
+    try:
+        apply = driver.find_element(By.ID, "apply-section")
+        apply.click()
+        if ("Apply now" in apply.text):
+            print("Applied Successfully for lottery: " + URL + "\n")
+        else:
+            print("Already applied for lottery: " + URL + "\n")
+    except:
+        print("Already applied for lottery: " + URL + "\n")
+        return None
 
-    apply.click()
 
     time.sleep(2)
 
-    terms_and_conditions = driver.find_element("xpath","//div[@class='mat-checkbox-inner-container']")
+    terms_and_conditions = None
 
-    terms_and_conditions.click()
+    try:
+        terms_and_conditions = driver.find_element("xpath","//div[@class='mat-checkbox-inner-container']")
+        terms_and_conditions.click()
+    except:
+        return None
+    
     time.sleep(2)
 
-    submit = driver.find_element('xpath',"//button[@class='btn btn-primary m-btn--pill']")
-
-    submit.click()
+    try:
+        submit = driver.find_element('xpath',"//button[@class='btn btn-primary m-btn--pill']")
+        submit.click()
+    except:
+        return None
     
     time.sleep(3)
-
-##################################################
-#  -Moves to next page- NO LONGER NEEDED
-# 
-# 
-# 
-##################################################
-
-# URL = "https://housingconnect.nyc.gov/PublicWeb/search-lotteries"
-# driver.get(URL)
-
-# try:
-#     elem = WebDriverWait(driver, 30).until(
-#     EC.presence_of_element_located(("xpath", "//li[@class='pagination-next ng-star-inserted']")) #This is a dummy element
-#     )
-# except:
-#     driver.quit()
-
-# try:
-#     nextPage = driver.find_element("xpath","//li[@class='pagination-next ng-star-inserted']")
-#     nextPage.click()
-# except:
-#     driver.quit()
-
-# time.sleep(50)
-
-##################################################
-#  gets lotteries
-# 
-# 
-# 
-##################################################
 
 def getLotteries():
     """
@@ -152,8 +137,8 @@ def getLotteries():
     "Amenities": [],
     "Boroughs": [],
     "Neighborhoods": [],
-    "HouseholdSize": os.getenv("HOUSEHOLD"),
-    "Income": os.getenv("INCOME"),
+    "HouseholdSize": USERS[userId]['HOUSEHOLD'],
+    "Income": USERS[userId]['INCOME'],
     "HouseholdType": 1,
     "OwnerTypes": [],
     }
@@ -170,30 +155,7 @@ def getLotteries():
 
     lotteryIDs = [i['lotteryId'] for i in response]
 
-    print(lotteryIDs)
-
     return lotteryIDs
-
-# print(lotteryIDs)
-
-# lotteryURL = "https://housingconnect.nyc.gov/PublicWeb/details/"
-
-def getApplications():
-    """
-    Gets all already completed applications
-
-    Pre: 
-        webdriver is properly globally instantiated
-        login() has been called and user is successfully logged in
-
-    Return:
-        A list of ints representing all applications to which the user has already applied
-        Ex: [3709, 3636, 3541, 3663, 3573, 3599, 3546, 2926, 3452]
-
-    Example of Usage:
-        getApplications()
-    """
-    return [3709, 3636, 3541, 3663, 3573, 3599, 3546, 2926, 3452]
 
 def applyAll(need_to_apply):
     """
@@ -214,17 +176,23 @@ def applyAll(need_to_apply):
         applyAll(["1234","2345","1369"])
 
     """
+    global userId
+    global driver
+
     for i in need_to_apply:
         apply(str(i))
 
-def main():
+    driver.close()
+    driver = webdriver.Chrome(service=ser, options=chrome_options)
+    userId+=1
+
+def initUser():
     login()
-    currentLotteryIDS = getLotteries()
-    currentApps = getApplications()
+    applyAll(getLotteries())
 
-    need_to_apply = list(set(currentLotteryIDS) - set(currentApps))
-
-    applyAll(need_to_apply)
+def main():
+    while(userId < len(USERS)):
+        initUser()
 
 if __name__ == "__main__":
     main()
