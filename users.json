@@ -1,0 +1,11 @@
+{
+    "CHROME_PATH": "./chromedriver",
+    "users": [
+        {
+          "USERNAME" : "",
+          "PASSWORD" : "",
+          "INCOME" : "",
+          "HOUSEHOLD" : ""
+        }
+    ]
+}
