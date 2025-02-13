@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from datetime import date
 import json
 import time
 import requests
@@ -80,21 +81,21 @@ def apply(lotteryID):
 
     driver.get(URL)
 
-    time.sleep(3)
+    time.sleep(10)
 
     try:
         apply = driver.find_element(By.ID, "apply-section")
         apply.click()
-        if ("Apply now" in apply.text):
-            print("Applied Successfully for lottery: " + URL + "\n")
+        if ("Apply Now" in apply.text):
+            print(date.today() , USERS[userId]['USERNAME'] + " applied Successfully for lottery: " + URL + "\n")
         else:
-            print("Already applied for lottery: " + URL + "\n")
+            print(date.today() , USERS[userId]['USERNAME'] + " already applied for lottery: " + URL + "\n")
     except:
-        print("Already applied for lottery: " + URL + "\n")
+        print(date.today() , USERS[userId]['USERNAME'] + " already applied for lottery: " + URL + "\n")
         return None
 
 
-    time.sleep(2)
+    time.sleep(3)
 
     terms_and_conditions = None
 
@@ -104,7 +105,7 @@ def apply(lotteryID):
     except:
         return None
     
-    time.sleep(2)
+    time.sleep(3)
 
     try:
         submit = driver.find_element('xpath',"//button[@class='btn btn-primary m-btn--pill']")
@@ -128,19 +129,18 @@ def getLotteries():
     searchAPI = "https://a806-housingconnectapi.nyc.gov/HPDPublicAPI/api/Lottery/SearchLotteries"
 
     data = {
-    "UnitTypes": [
-        1,
-        2
-    ],
-    "NearbyPlaces": [],
-    "NearbySubways": [],
-    "Amenities": [],
-    "Boroughs": [],
-    "Neighborhoods": [],
-    "HouseholdSize": USERS[userId]['HOUSEHOLD'],
-    "Income": USERS[userId]['INCOME'],
-    "HouseholdType": 1,
-    "OwnerTypes": [],
+        "UnitTypes": [1,2],
+        "NearbyPlaces": [],
+        "NearbySubways": [],
+        "Amenities": [],
+        "HPDUserId": "1",
+        "Boroughs": [],
+        "Neighborhoods": [],
+        "HouseholdSize": USERS[userId]['HOUSEHOLD'],
+        "Income": USERS[userId]['INCOME'],
+        "HouseholdType": 1,
+        "OwnerTypes": [],
+        "PreferanceTypes": [],
     }
 
     headers = {
@@ -151,9 +151,9 @@ def getLotteries():
         "Content-Type": "application/json"
     }
 
-    response = requests.post(searchAPI, headers=headers, json=data).json()['rentals']
+    response = requests.post(searchAPI, headers=headers, json=data).json()
 
-    lotteryIDs = [i['lotteryId'] for i in response]
+    lotteryIDs = [i['lotteryId'] for i in ( response['rentals'] + response['sales'])]
 
     return lotteryIDs
 
