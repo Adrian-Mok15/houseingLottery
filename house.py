@@ -16,14 +16,14 @@ file = open('users.json')
 env = json.load(file)
 userId = 0
 
-CHROME_PATH = env['CHROME_PATH']
+#CHROME_PATH = env['CHROME_PATH']
 USERS = env['users']
 
-ser = Service(CHROME_PATH)
+#ser = Service(CHROME_PATH)
 
 chrome_options = Options()
 # chrome_options.add_argument("--headless")
-driver = webdriver.Chrome(service=ser, options=chrome_options)
+driver = webdriver.Chrome(options=chrome_options)
 
 def login():
     """
