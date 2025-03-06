@@ -22,7 +22,7 @@ USERS = env['users']
 #ser = Service(CHROME_PATH)
 
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 driver = webdriver.Chrome(options=chrome_options)
 
 def login():
@@ -183,7 +183,7 @@ def applyAll(need_to_apply):
         apply(str(i))
 
     driver.close()
-    driver = webdriver.Chrome(service=ser, options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
     userId+=1
 
 def initUser():
